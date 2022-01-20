@@ -1,12 +1,12 @@
-from ast import While
+from asyncio.windows_events import NULL
 from base64 import decode
 import socket
+import time
 host="localhost"
 port=50000
 s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 s.connect((host,port))#Conecta no servidor
-menu=s.recv(1024)#Recebe a string menu
-menu=menu.decode()#Decodifica a string menu para usar na função main
+
 def caixa_mensagens(s):
     while True:
         print("-----------------------------------------------------------")
@@ -15,33 +15,63 @@ def caixa_mensagens(s):
         entrada=input()
         s.sendall(entrada.encode())
         if entrada=='1':#Verificar Email
-            existe=s.recv(1024)
-            existe=existe.decode()
-            if existe=="True":
-                tamanho=s.recv(1024)
-                tamanho=int(tamanho.decode())
+            existe1=s.recv(1024)
+            existe1=existe1.decode()
+            if existe1=="True":
+                tamanho1=s.recv(1024)
+                tamanho1=int(tamanho1.decode())
                 cont=0
-                
-                while cont<=(tamanho-2):
-                    print(cont)
-                    print(tamanho)
-                    mostrar=s.recv(1024)
-                    print(mostrar.decode())
+                while cont<=tamanho1-2:
+                    mostrar1=s.recv(1024)
+                    print(mostrar1.decode())
+                    mostrar1=NULL
                     cont=cont+1
+                    time.sleep(0.1)
+                    
                 print("-----------------------------------------------------------")
-                entrada3=input("Digite o numero referente ao email que deseja ler: ")
+                entrada1=input("Digite o numero referente ao email que deseja ler: ")
                 print("-----------------------------------------------------------")            
-                s.sendall(entrada3.encode())
-                emailfinal=s.recv(2048)
-                emailfinal=emailfinal.decode()
-                print(emailfinal)
-            if existe== "False":
+                s.sendall(entrada1.encode())
+                if int(entrada1)>=0 and int(entrada1) <= tamanho1-2:
+                    emailfinal1=s.recv(2048)
+                    emailfinal1=emailfinal1.decode()
+                    print(emailfinal1)
+                else:
+                    print("Você deve inserir um numero valido.")
+            if existe1== "False":
                 print("O seu email nao possui nenhuma mensagem na caixa de entrada.")
                 
 
             
         if entrada=='2':#Apagar Email
-            s.sendall(entrada.encode())
+            existe2=s.recv(1024)
+            existe2=existe2.decode()
+            if existe2=="True":
+                tamanho2=s.recv(1024)
+                tamanho2=int(tamanho2.decode())
+                cont=0
+                ###ERRRO ESTA POR AQUI quando ocont ta 0 ele ja printa todas mensagens
+                while cont<=tamanho2-2:
+                    print(cont)
+                    print(tamanho2)
+                    print('esperando')
+                    mostrar2=s.recv(1024)
+                    print(mostrar2.decode())
+                    mostrar2=NULL
+                    cont=cont+1
+                print("-----------------------------------------------------------")
+                entrada3=input("Digite o numero referente ao email que deseja apagar: ")
+                print("-----------------------------------------------------------") 
+                s.sendall(entrada3.encode())
+                if int(entrada3) >=0 and int(entrada3) <=tamanho2-2:           
+                    emailfinal2=s.recv(2048)
+                    emailfinal2=emailfinal2.decode()
+                    print(emailfinal2)
+                else:
+                    print("Voce precisa inserir um numero valido...")
+            if existe2== "False":
+                print("O seu email nao possui nenhuma mensagem na caixa de entrada.")
+            
             
         if entrada=='3':#Enviar Email
             print("------------------Atenção--------------------------")
@@ -56,7 +86,7 @@ def caixa_mensagens(s):
             print(saida.decode())
             
         if entrada=='4':#Sair conta
-            s.sendall(entrada.encode())           
+            main(s)        
 
 
 def login(s):#Função que faz o login no servidor.
@@ -86,17 +116,21 @@ def registrar(s):#Registrar novo email e senha
     print(dado.decode())#Printa na tela cliente o dado recebido do servidor
     main(s)#Chama a função que contém o menu de login e cadastro. 
 def main(s):#Função que contem o menu de login e cadastro.
-    print("-----------------------------------------------------------")
-    print(menu)
-    print("-----------------------------------------------------------")
-    entrada=input("Digite sua entrada: ")
-    s.sendall(entrada.encode())
-    if entrada=='1':
-        login(s)
-    if entrada=='2':
-        registrar(s)
-    if entrada=='9':
-        s.close()
+    while True:
+        menu=s.recv(1024)#Recebe a string menu
+        menu=menu.decode()#Decodifica a string menu para usar na função main
+        print("-----------------------------------------------------------")
+        print(menu)
+        print("-----------------------------------------------------------")
+        entrada=input("Digite sua entrada: ")
+        s.sendall(entrada.encode())    
+        if entrada=='1':
+            login(s)
+        if entrada=='2':
+            registrar(s)
+        if entrada=='9':
+            print("Desconectado....")
+            break
 main(s)
 
 
